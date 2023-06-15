@@ -1,12 +1,12 @@
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import { getFilter } from 'redux/selectors';
-import { updateFilter } from 'redux/contactsSlice';
+import { selectFilter } from 'redux/selectors';
+import { setFilter } from 'redux/filterSlice';
 import styles from './filter.module.css';
 
 export const Filter = () => {
   const dispatch = useDispatch();
-  const filter = useSelector(getFilter);
+  const filter = useSelector(selectFilter);
 
   return (
     <div className={styles.div}>
@@ -17,7 +17,7 @@ export const Filter = () => {
           type="text"
           name="filter"
           value={filter}
-          onChange={event => dispatch(updateFilter(event.target.value.trim()))}
+          onChange={event => dispatch(setFilter(event.target.value.trim()))}
         ></input>
       </label>
     </div>

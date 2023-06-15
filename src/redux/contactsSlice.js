@@ -1,42 +1,68 @@
-import { createSlice, nanoid } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import { fetchContacts, addContact, deleteContact } from './operations';
 
 const initialState = {
-  contacts: [
-    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ],
-  filter: '',
+  contacts: {
+    items: [],
+    isLoading: false,
+    error: null,
+  },
+};
+
+const handlePending = state => {
+  state.contacts.isLoading = true;
+};
+
+const handlFulfilled = state => {
+  state.contacts.isloading = false;
+  state.contacts.error = '';
+};
+
+const handlFulfilledGet = (state, { payload }) => {
+  // state.contacts.items = payload;
+  state.contacts.items = payload.sort((a, b) => a.name.localeCompare(b.name));
+};
+
+const handlFulfilledAdd = (state, { payload }) => {
+  // state.contacts.items.push(payload);
+
+  state.contacts.items = [...state.contacts.items, payload].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+  alert(`${payload.name} new content will be added.`);
+};
+const handlFulfilledDelete = (state, { payload }) => {
+  state.contacts.items = state.contacts.items.filter(
+    el => el.id !== payload.id
+  );
+  alert(`${payload.name} was deleted from your contacts.`);
+};
+
+const handleRejected = (state, { payload }) => {
+  state.contacts.isLoading = false;
+  state.contacts.error = payload;
 };
 
 const contactsSlice = createSlice({
   name: 'contacts',
   initialState,
-  reducers: {
-    addContact: {
-      reducer(state, action) {
-        state.contacts.push(action.payload);
-      },
-      prepare(contact) {
-        return {
-          payload: { id: nanoid(), name: contact.name, number: contact.number },
-        };
-      },
-    },
-    deleteContact(state, action) {
-      const index = state.contacts.findIndex(
-        contact => contact.id === action.payload
-      );
-      state.contacts.splice(index, 1);
-    },
-    updateFilter(state, action) {
-      state.filter = action.payload;
-    },
+  extraReducers: builder => {
+    builder
+
+      .addCase(fetchContacts.fulfilled, handlFulfilledGet)
+      .addCase(addContact.fulfilled, handlFulfilledAdd)
+      .addCase(deleteContact.fulfilled, handlFulfilledDelete)
+
+      .addMatcher(action => {
+        action.type.endsWith('/pending');
+      }, handlePending)
+      .addMatcher(action => {
+        action.type.endsWith('/rejected');
+      }, handleRejected)
+      .addMatcher(action => {
+        action.type.endsWith('/fulfilled');
+      }, handlFulfilled);
   },
 });
-// Експортуємо генератори екшенів та редюсер
-export const { addContact, deleteContact, updateFilter } =
-  contactsSlice.actions;
 
 export const contactsReducer = contactsSlice.reducer;

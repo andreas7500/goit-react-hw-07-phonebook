@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import styles from './contactForm.module.css';
 import PropTypes from 'prop-types';
-import { addContact } from 'redux/contactsSlice';
-import { getContacts } from 'redux/selectors';
+import { addContact } from 'redux/operations';
+import { selectContacts } from 'redux/selectors';
 import { useDispatch, useSelector } from 'react-redux';
 import { nanoid } from 'nanoid';
 
 export const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+
   const dispatch = useDispatch();
-  const contacts = useSelector(getContacts);
+  const contacts = useSelector(selectContacts);
 
   const handleChangeName = event => {
     setName(event.target.value);
@@ -49,7 +50,9 @@ export const ContactForm = () => {
           value={name}
           onChange={handleChangeName}
           name="name"
-          pattern="^[a-zA-Z\s]+$"
+          placeholder="Enter name..."
+          pattern="^[А-Яа-яЁёa-zA-Z\s]+$"
+          // pattern="^[a-zA-Z\s]+$"
           // pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
           // title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
           title="Only letters!"
@@ -64,7 +67,9 @@ export const ContactForm = () => {
           className={styles.input}
           value={number}
           onChange={handleChangeNumber}
-          pattern="^[0-9]+$"
+          placeholder="Enter number..."
+          pattern="\+?[0-9\s\-\(\)]+"
+          // pattern="^[0-9]+$"
           // pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           // title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           title="Only number!"

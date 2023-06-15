@@ -1,42 +1,50 @@
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getFilter, getContacts } from 'redux/selectors';
+import {
+  selectVisibleContacts,
+  selectError,
+  selectIsLoading,
+} from 'redux/selectors';
 import styles from './contactList.module.css';
-import { deleteContact } from 'redux/contactsSlice';
+import { fetchContacts, deleteContact } from 'redux/operations';
 
 export const ContactList = () => {
-  const contacts = useSelector(getContacts);
-  const filter = useSelector(getFilter);
   const dispatch = useDispatch();
 
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(filter.toLowerCase())
-  );
+  const filteredContacts = useSelector(selectVisibleContacts);
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   const onDeleteContact = id => {
     dispatch(deleteContact(id));
   };
 
   return (
-    <ul className={styles.list}>
-      {filteredContacts.map(contact => (
-        <li className={styles.item} key={contact.id}>
-          <span className={styles.name}>{contact.name}: </span>
+    <div>
+      {isLoading && <p>Loading contacts...</p>}
+      {error && <p>{error}</p>}
+      <ul className={styles.list}>
+        {filteredContacts.map(contact => (
+          <li className={styles.item} key={contact.id}>
+            <span className={styles.name}>{contact.name}: </span>
+            <span className={styles.phone}>{`tel: ${contact.phone}`} </span>
 
-          <a href={`tel: ${contact.number}`} className={styles.number}>
-            {contact.number}
-          </a>
-
-          <button
-            className={styles.button}
-            type="button"
-            onClick={() => onDeleteContact(contact.id)}
-          >
-            Delete
-          </button>
-        </li>
-      ))}
-    </ul>
+            <button
+              className={styles.button}
+              type="button"
+              onClick={() => onDeleteContact(contact.id)}
+            >
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
